@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ProductRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -41,6 +43,21 @@ class Product
      * @ORM\Column(type="float")
      */
     private $Prix;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $category;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Category::class, mappedBy="product")
+     */
+    private $product;
+
+    public function __construct()
+    {
+        $this->product = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -103,6 +120,45 @@ class Product
     public function setPrix(float $Prix): self
     {
         $this->Prix = $Prix;
+
+        return $this;
+    }
+
+    public function getCategory(): ?string
+    {
+        return $this->category;
+    }
+
+    public function setCategory(string $category): self
+    {
+        $this->category = $category;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Category>
+     */
+    public function getProduct(): Collection
+    {
+        return $this->product;
+    }
+
+    public function addProduct(Category $product): self
+    {
+        if (!$this->product->contains($product)) {
+            $this->product[] = $product;
+            $product->addProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProduct(Category $product): self
+    {
+        if ($this->product->removeElement($product)) {
+            $product->removeProduct($this);
+        }
 
         return $this;
     }
